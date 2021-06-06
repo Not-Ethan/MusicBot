@@ -30,6 +30,7 @@ module.exports = class ServerQueue {
         }
         setVolume(x) {
             this.dispatcher.setVolume(x);
+            this.volume = x;
         }
         addSong(x) {
             this.songs.push(x);
@@ -40,7 +41,7 @@ module.exports = class ServerQueue {
         async playAudio() {
             this.index += 1;
             this.current = this.songs[this.index];
-            this.dispatcher = this.connection.play(Readable.from(ytdl(this.current.url, {fmt: "mp3", encoderArgs: ["-af", "bass=g="+this.bass], filter:"audioonly"})));
+            this.dispatcher = this.connection.play(Readable.from(ytdl(this.current.url, {fmt: "mp3", encoderArgs: ["-af", "bass=g="+this.bass], filter:"audioonly", highWaterMark: 1024*32})));
             this.dispatcher.setVolume(this.volume);
             this.dispatcher.on("finish", async ()=>{
                     if(this.songs[this.index+1]) {
@@ -77,7 +78,7 @@ module.exports = class ServerQueue {
                 this.dispatcher.end();
         }
         replay() {
-            this.index = -1
+            this.index -= 1
             this.playAudio();
         }
         clear() {
