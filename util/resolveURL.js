@@ -1,0 +1,1 @@
+module.exports = (x) => `https://youtube.com/watch?v=${x}`

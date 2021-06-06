@@ -1,0 +1,33 @@
+{
+  "name": "texttospeech",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/opus": "^0.3.3",
+    "@types/fs-extra": "^9.0.11",
+    "better-sqlite3": "^7.4.0",
+    "better-sqlite3-with-prebuilds": "^7.1.8",
+    "canvas": "^2.8.0",
+    "discord-buttons": "^3.1.1",
+    "discord-ytdl-core": "^5.0.3",
+    "discord.js": "^12.3.1",
+    "enmap": "^5.8.5",
+    "ffmpeg": "0.0.4",
+    "ffmpeg-static": "^4.2.7",
+    "fs-extra": "^10.0.0",
+    "node-google-tts-api": "^1.1.1",
+    "spotify-url-info": "^2.2.3",
+    "spotify-web-api-node": "^5.0.2",
+    "youtube-search-api": "^1.0.10",
+    "youtube-suggest": "^1.1.2",
+    "ytdl-core": "^4.8.2",
+    "ytdl-core-discord": "^1.3.0",
+    "ytsearcher": "^1.2.4"
+  }
+}
