@@ -11,7 +11,7 @@ module.exports = {
 }
 function formatQueue(q) {
     if(q.songs[0]) {
-        return "```\n"+`${q.songs.length} songs in queue \n Volume: ${q.volume}x\n`+`${q.songs.map((e, i)=>`${q.index==i ? ">>> " : " "}${i+1}. ${e.name} | ${e.time}`).join("\n\n")}`+"```"
+        return "```\n"+`${q.songs.length} songs in queue \nVolume: ${q.volume}x\n`+`${q.songs.map((e, i)=>`${q.index==i ? ">>> " : " "}${i+1}. ${e.name} | ${e.time}`).join("\n\n")}`+"```"
     } else {
         return "No songs queued right now.";
     }

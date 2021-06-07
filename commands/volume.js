@@ -1,6 +1,6 @@
 module.exports = {
     name: "volume",
-    alias: [],
+    alias: ["v"],
     args: [{placeholder: "number", description: "how much to change the volume by. (source audio being 1)"}],
     syntax: "volume",
     description: "change volume",

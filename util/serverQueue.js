@@ -41,12 +41,14 @@ module.exports = class ServerQueue {
         async playAudio() {
             this.index += 1;
             this.current = this.songs[this.index];
-            this.dispatcher = this.connection.play(Readable.from(ytdl(this.current.url, {fmt: "mp3", encoderArgs: ["-af", "bass=g="+this.bass], filter:"audioonly", highWaterMark: 1024*32})));
+            this.dispatcher = this.connection.play(Readable.from(ytdl(this.current.url, {fmt: "mp3", encoderArgs: ["-af", "bass=g="+this.bass+",dynaudnorm=f=200"], filter:"audioonly", highWaterMark: 1024*32})));
             this.dispatcher.setVolume(this.volume);
             this.dispatcher.on("finish", async ()=>{
                     if(this.songs[this.index+1]) {
                         this.playAudio();
-                        this.message.channel.send(new MessageEmbed().setTitle("Now Playing").setDescription(this.current.name).setURL(resolve(this.current.url)).setTimestamp());
+                        let button = new MessageButton().setLabel("❤️ \u200b\u200b").setID(`${this.server.id}_favoriteCurrent`).setStyle("green");
+                        let row = new MessageActionRow().addComponent(button);
+                        this.message.channel.send("",{embed: new MessageEmbed().setTitle("Now Playing").setDescription(this.current.name).setURL(resolve(this.current.url)).setTimestamp(), components: [row]});
                     } else if(!this.loop&&this.songs[0]){
                         this.pause(true);
                         this.current = null;

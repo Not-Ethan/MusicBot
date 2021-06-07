@@ -26,7 +26,6 @@ module.exports = {
     },
     _parseLength(percent) {
         let adjusted = percent * 10;
-        console.log(adjusted);
         let toReturn = [];
         for(let i = 0; i < 10; i++) {
             if(i<=adjusted-1) toReturn[i] = ">>>";
