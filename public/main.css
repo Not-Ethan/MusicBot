@@ -20,17 +20,36 @@
 .load-expand-hr {
     animation: expand 2s ease-in-out 0s 1 normal backwards;
 }
+.load-slide-in-from-left {
+    animation: slide-in-left 1s ease-out 0s 1 none forwards;
+}
+.hover-glow:hover {
+    box-shadow: 0 0 5px 1px white;
+    animation: pulse 4s ease 0s infinite normal none;
+}
 :root {
     --bg-animation-translate-x: 10px;
     --bg-animation-translate-y: 10px;
 }
+.card-img-top {
+    width: 100%;
+    height: 40vh;
+    object-fit: cover;
+    }
 @keyframes bg-animate {
     100% {
         transform: scale(3) rotate(360deg) translate(var(--bg-animation-translate-x), var(--bg-animation-translate-y));
         opacity: 0;
     }
 }
-
+@keyframes slide-in-left {
+    0% {
+        left: 0%;
+    }
+    100% {
+        left: 100%;
+    }
+}
 @keyframes expand {
     0% {
         width: 50%;
