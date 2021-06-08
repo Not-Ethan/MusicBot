@@ -32,6 +32,7 @@
     "open-iconic": "^1.1.1",
     "passport": "^0.4.1",
     "passport-discord": "^0.1.4",
+    "prism-media": "^1.2.9",
     "spotify-url-info": "^2.2.3",
     "spotify-web-api-node": "^5.0.2",
     "youtube-search-api": "^1.0.10",

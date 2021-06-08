@@ -5,36 +5,39 @@
 </head>
 <body class="intro"style="background-color: rgb(39, 42, 46);">
   <%- include ("partials/nav.ejs")%>
-<div class="jumbotron jumbotron-fluid bg-secondary load-zoom-in" style="text-align: center;">
+<div class="jumbotron jumbotron-fluid load-zoom-in jt-bg-animate bg-secondary" id="index-main-display" style="text-align: center; position: relative; z-index: 0;">
+  <div style = "background-color: transparent; z-index: 1; position: relative;">
   <h1 class="display-3 text-light">Music Bot</h1>
-  <hr class="my-2" style="border-color: white;">
+  <hr class="my-2 load-expand-hr" style="border-color: white;">
   <p class="lead">
     <a class="btn btn-primary btn-lg" href="/dashboard" role="button">Go to dashboard</a>
   </p>
+  </div>
 </div>
 <div class="container-fluid float load-zoom-out" style="margin-top: 20px;">
     <div class="card-columns text-light align-items-center flex-row d-flex"style="background-color: rgb(39, 42, 46);">
         <div class="card glow d-flex mx-2 index-card">
             <div class="card-body">
                 <h4 class="card-title text-success"><span class="oi oi-headphones"></span><br>Play Music</h4>
-                <p class="card-text">Text</p>
+                <p class="card-text">Play music with your friends.</p>
             </div>
         </div>
         
         <div class="card glow d-flex mx-2 index-card">
             <div class="card-body">
                 <h4 class="card-title text-primary"><span class="oi oi-media-play"></span><br>Youtube Search</h4>
-                <p class="card-text">Text</p>
+                <p class="card-text">Search youtube for your favorite songs. No link required.</p>
             </div>
         </div>
         <div class="card glow d-flex mx-2 index-card">
             <div class="card-body">
                 <h4 class="card-title text-danger"><span class="oi oi-ellipses"></span><br>Much, Much, More</h4>
-                <p class="card-text">Text</p>
+                <p class="card-text">Many more features. See docs for examples of all of them.</p>
             </div>
         </div>
     </div>
     </div>
     </div>
 <%- include ("partials/footer.ejs")%>
+<script src="/main.js"></script>
 </body>

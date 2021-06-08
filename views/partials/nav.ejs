@@ -16,7 +16,7 @@
             </li>
             <% } %>
           <li class="nav-item">
-            <a class="nav-link" href="#">Dashboard</a>
+            <a class="nav-link" href="/dashboard">Dashboard <span class="oi oi-dial"></span></a>
           </li>
         </ul>
 
@@ -25,11 +25,10 @@
             <li><a href="/login" class="text-white"><span class="oi oi-key text-light"></span> Login</a></li>
           </ul>
         <%} else {%>
-          <div class="d-none d-sm-inline-block ml-auto" style="color:aliceblue;">
-            <span style="margin-right: 10px;">
+          <div class="d-none d-sm-inline-block ml-auto flex-row" style="color:aliceblue;">
+            <span style="margin-right: 10px;" class="d-flex">
               <strong style="color: rgb(254, 254, 254);"><%- user.username %></strong>#
-              <%- user.discriminator %></span>
-              <a class="nav-link" href="#" id="userimg" role="button"><img class="ml-auto" src=<%= user.avatarURL %>?size=32></a>
+              <%- user.discriminator %><a class="nav-link d-flex" href="#" id="userimg" role="button"><img class="ml-auto" src=<%= user.avatarURL %>?size=32></a></span>
           </div>
           <%}%>
         </div>
