@@ -8,11 +8,36 @@
 .index-card {
     background-color: rgb(39, 42, 46);
 }
+.shape {
+    animation: bg-animate 10s ease 0s 1 normal forwards;
+}
 .load-zoom-in {
     animation: zoom-in 1s ease-out 0ms 1 normal forwards;
 }
 .load-zoom-out {
     animation: zoom-out 1s ease-out 0ms 1 normal forwards;
+}
+.load-expand-hr {
+    animation: expand 2s ease-in-out 0s 1 normal backwards;
+}
+:root {
+    --bg-animation-translate-x: 10px;
+    --bg-animation-translate-y: 10px;
+}
+@keyframes bg-animate {
+    100% {
+        transform: scale(3) rotate(360deg) translate(var(--bg-animation-translate-x), var(--bg-animation-translate-y));
+        opacity: 0;
+    }
+}
+
+@keyframes expand {
+    0% {
+        width: 50%;
+    }
+    100% {
+        width: 100%;
+    }
 }
 @keyframes zoom-in {
     0% {
