@@ -181,13 +181,15 @@ const bodyParser = require("body-parser");
 const passport = require("passport");
 const DiscordStrategy = require("passport-discord").Strategy;
 const CookieParser = require("cookie-parser");
+const session = require("express-session")
+
 passport.use(new DiscordStrategy({
     clientID: "850562794968449056",
     clientSecret: require("./config.json").CLIENT_SECRET,
-    callbackURL: app.path()+"/auth/discord/cb",
+    callbackURL: "/auth/discord/cb",
     scope: ["guilds", "identify"]
 },(a,b,c,f)=>{
-    f(c);
+    f(null, c);
 }));
 passport.serializeUser(function(u, d) {
     if(u.avatar.startsWith("a_")) u.avatarURL = `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.gif`;
@@ -202,13 +204,26 @@ passport.deserializeUser(function(u, d) {
 app.set("view engine", "ejs");
 app.use(bodyParser.json());
 app.use(CookieParser("secret"));
+app.use(session({
+    key:"key",
+    secret: "secret",
+    resave: true,
+    saveUninitialized: true
+}));
 app.use(passport.initialize());
 app.use(passport.session())
 app.use(express.static("public"));
 app.get("/", async (req, res) => {
-    return res.render("index");
+    return res.render("index", {user: req.session?.user});
 });
 app.get("/login", passport.authenticate("discord"));
-app.get("/auth/discord/cb", passport.authenticate("discord", {failureRedirect: "/"}))
-
+app.get("/auth/discord/cb", passport.authenticate("discord", {failureRedirect:"/"}), (req,res)=>{
+    req.session.user = req.user;
+    req.session.save();
+    res.redirect("/");
+});
+app.get("/logout", (req, res)=>{
+    req.session.destroy();
+    res.redirect("/");
+});
 app.listen(3000);
