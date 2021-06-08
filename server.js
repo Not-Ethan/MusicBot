@@ -5,20 +5,24 @@ const commandFiles = fs.readdirSync("./commands").filter(e=>e.endsWith(".js"));
 const {TOKEN} = require("./config.json");
 const Enmap = require("enmap");
 require("discord-buttons")(client);
+const {MessageActionRow, MessageButton} = require("discord-buttons");
 client.commands = new Discord.Collection();
 client.settings = new Enmap("settings");
+client.favorites = new Enmap("favorites");
+client.menus = {}
+client.menus.favorites = new Discord.Collection();
 const defaultSettings = {
     prefix: "$"
 }
 for (let file of commandFiles) {
     const command = require(`./commands/${file}`);
+
 	client.commands.set(command.name, command);
 }
 client.queue = new Discord.Collection();
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
-
 client.activeSearches = new Discord.Collection();
 function startsWithPrefix(message, prefix) {
     if(message.content.startsWith(prefix)) return true;
@@ -26,8 +30,7 @@ function startsWithPrefix(message, prefix) {
     return false;
 }
 client.on('message', message => {
-    if(!client.settings.get(message.guild.id)) client.settings.set(message.guild.id, defaultSettings);
-    let prefix = client.settings.get(message.guild.id).prefix;
+    let prefix = client.settings.ensure(message.guild.id, defaultSettings).prefix;
     if(!startsWithPrefix(message, prefix)|| message.author.bot) {
         return;
     }
@@ -47,15 +50,43 @@ client.on('message', message => {
         }
     }
 });
-const ytdl = require("discord-ytdl-core");
 const Queue = require("./util/serverQueue");
 const resolve = require("./util/resolveURL");
 const {MessageEmbed} = require("discord.js");
-const {Readable} = require("stream");
 client.on("clickButton", async button=>{
     let decoded = button.id.split("_");
+    if(decoded[1]=="favoriteCurrent") {
+        let queue = client.queue.get(decoded[0]);
+        if(!queue) return button.defer();
+        await button.clicker.fetch();
+        let f = client.favorites.ensure(button.clicker.user.id, []);
+        if(!queue.current) return button.defer();
+        f.push(queue.current);
+        client.favorites.set(button.clicker.user.id, f);
+        return button.defer();
+    }
     let selector = client.activeSearches.get(decoded[0]);
-    if(!selector) {             
+    if(!selector) {
+        let menu = client.menus[decoded[2]]?.get(decoded[0]);
+        if(!menu) return button.defer();
+        else switch(decoded[1]) {
+            case "menuUp": {
+                menu.up();
+                break;
+            }
+            case "menuDown": {
+                menu.down();
+                break;
+            }
+            case "menuSelect": {
+                menu.execute();
+                break;
+            }
+            default: {
+                button.defer();
+            }
+        }
+
         let queue = client.queue.get(decoded[0]);
         if(!queue) {
             button.defer(); return;
@@ -65,7 +96,7 @@ client.on("clickButton", async button=>{
         switch(decoded[1]) {
         case "replay": {
             queue.index = -1;
-            queue.dispatcher.emit("finish");
+            queue.dispatcher.end();
             button.defer();
             break;
         }
@@ -108,7 +139,9 @@ client.on("clickButton", async button=>{
             let vc = member.voice.channel;
             let con = await vc.join();
             if(!client.queue.get(member.guild.id)) {
-                let queue = new Queue(client, button.message.channel, member.guild, con, {url: resolve(selector.current.id), name: selector.current.title, time: selector.current.length.simpleText, thumbnail: selector.current.thumbnail.thumbnails}, await button.channel.send({embed: new MessageEmbed().setTitle("Now Playing").setDescription(selector.current.title).setURL(resolve(selector.current.id))}));
+                let b = new MessageButton().setLabel("❤️ \u200b\u200b").setID(`${member.guild.id}_favoriteCurrent`).setStyle("green");
+                let row = new MessageActionRow().addComponent(b);
+                let queue = new Queue(client, button.message.channel, member.guild, con, {url: resolve(selector.current.id), name: selector.current.title, time: selector.current.length.simpleText, thumbnail: selector.current.thumbnail.thumbnails}, await button.channel.send({embed: new MessageEmbed().setTitle("Now Playing").setDescription(selector.current.title).setURL(resolve(selector.current.id)), components: [row]}));
                 client.queue.set(member.guild.id, queue);
             } else {
                 let queue = client.queue.get(member.guild.id);
@@ -133,10 +166,6 @@ client.on("clickButton", async button=>{
 
 })
 
-client.on('guildCreate', (guild) => {
-
-});
-
 function clean(array) {
     return array.filter(e=>Boolean(e));
 }
@@ -145,3 +174,56 @@ function clean(array) {
 
 
 client.login(TOKEN);
+
+const express = require("express");
+const app = express();
+const bodyParser = require("body-parser");
+const passport = require("passport");
+const DiscordStrategy = require("passport-discord").Strategy;
+const CookieParser = require("cookie-parser");
+const session = require("express-session")
+
+passport.use(new DiscordStrategy({
+    clientID: "850562794968449056",
+    clientSecret: require("./config.json").CLIENT_SECRET,
+    callbackURL: "/auth/discord/cb",
+    scope: ["guilds", "identify"]
+},(a,b,c,f)=>{
+    f(null, c);
+}));
+passport.serializeUser(function(u, d) {
+    if(u.avatar.startsWith("a_")) u.avatarURL = `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.gif`;
+    else u.avatarURL = `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png`;
+    d(null, u);
+});
+passport.deserializeUser(function(u, d) {
+    if(u.avatar.startsWith("a_")) u.avatarURL = `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.gif`;
+    else u.avatarURL = `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png`;
+    d(null, u);
+});
+app.set("view engine", "ejs");
+app.use(bodyParser.json());
+app.use(CookieParser("secret"));
+app.use(session({
+    key:"key",
+    secret: "secret",
+    resave: true,
+    saveUninitialized: true
+}));
+app.use(passport.initialize());
+app.use(passport.session())
+app.use(express.static("public"));
+app.get("/", async (req, res) => {
+    return res.render("index", {user: req.session?.user});
+});
+app.get("/login", passport.authenticate("discord"));
+app.get("/auth/discord/cb", passport.authenticate("discord", {failureRedirect:"/"}), (req,res)=>{
+    req.session.user = req.user;
+    req.session.save();
+    res.redirect("/");
+});
+app.get("/logout", (req, res)=>{
+    req.session.destroy();
+    res.redirect("/");
+});
+app.listen(3000);
