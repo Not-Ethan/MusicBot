@@ -11,11 +11,11 @@ function animateBackground() {
     e.style.zIndex = 0;
     e.style.setProperty("--gb-animation-translate-x", Math.floor(Math.random()*20))
     e.style.setProperty("--gb-animation-translate-y", Math.floor(Math.random()*20))
-    e.innerHTML = "&#9633"
+    e.innerHTML = (()=>{switch (Math.floor(Math.random()*3)) {case 2: return "&#9633"; case 0: return "&#11040"; case 1: return "&#9651"}})();
     bg.appendChild(e);
     setTimeout(()=>{
         animateBackground();
-    }, Math.random()*1000)
+    }, Math.random()*1000);
     setTimeout(()=>{
         bg.removeChild(e);
     }, 10000)
