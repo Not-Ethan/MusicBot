@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%-include ("partials/head.ejs")%>
+    <link rel="stylesheet" href = "/main.css">
+</head>
+    <body style="text-align: center">
+        <%- include("partials/nav")%>
+        <div class="container-fluid bg-dark">
+            <<div class="jumbotron jumbotron-fluid bg-secondary load-zoom-in" style="text-align: center">
+                    <h1 class="display-3">Servers</h1>
+                </div>
+            <div class="card-columns">
+                <%for (guild of joined) {%>
+                    <div class="card border border-success bg-secondary hover-glow">
+                            <img class="card-img-top rounded" src="<%=guild.iconURL%>" style="width:100px; height: 100px;" alt="Card image">
+                        <div class="card-body">
+                            <h4 class="card-title"><%=guild.name%></h4>
+                            <a class="btn-primary p-3 rounded" href="/dashboard/<%=guild.id%>">Go <span class="oi oi-arrow-right"></span></a>
+                        </div>
+                    </div>
+                <%}%>
+            </div>
+            <h3 class="text-light">Not Joined</h3>
+            <div class="card-columns">
+            <%for (guild of toJoin) {%>
+                <div class="card border border-danger bg-secondary">
+                    <img class="card-img-top rounded" src="<%=guild.iconURL%>" style="width:100px; height: 100px; filter: grayscale(100%);" alt="Card image">
+                <div class="card-body">
+                    <h4 class="card-title"><%=guild.name%></h4>
+                    <a class="btn-info p-3 rounded" href="https://discord.com/api/oauth2/authorize?client_id=850562794968449056&permissions=8&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fdiscord%2Fcb&scope=bot">Invite<span class="oi oi-arrow-right"></span></a>
+                </div>
+            </div>
+        <%}%>
+            </div>
+        </div>
+
+        <%-include("partials/footer.ejs")%>
+    </body>
+</html>
