@@ -46,6 +46,8 @@ client.on('message', message => {
     args = clean(args);
     if(client.commands.get(args[0].toLowerCase())||client.commands.filter(e=>e.alias.includes(args[0]))) {
         if(client.commands.find(e=>e.name==args[0].toLowerCase()||e.alias.includes(args[0].toLowerCase()))) {
+            let command = client.commands.find(e=>e.name==args[0].toLowerCase()||e.alias.includes(args[0].toLowerCase()));
+            if(command.disabled&&message.author.id!="402639792552017920") return;
             client.commands.find(e=>e.name==args[0].toLowerCase()||e.alias.includes(args[0].toLowerCase())).execute(client,message,args);
         }
     }
@@ -67,6 +69,7 @@ client.on("clickButton", async button=>{
     }
     let selector = client.activeSearches.get(decoded[0]);
     if(!selector) {
+        /*
         let menu = client.menus[decoded[2]]?.get(decoded[0]);
         if(!menu) return button.defer();
         else switch(decoded[1]) {
@@ -86,17 +89,17 @@ client.on("clickButton", async button=>{
                 button.defer();
             }
         }
-
+*/
         let queue = client.queue.get(decoded[0]);
         if(!queue) {
-            button.defer(); return;
+            console.log("j");button.defer(); return;
         }
         await button.clicker.fetch()
-        if(!button.clicker.member.voice.channel==queue.connection.channel.id) button.defer();
+        if(!button.clicker.member.voice.channel.id==queue.connection.channel.id) {console.log(j); button.defer();}
         switch(decoded[1]) {
         case "replay": {
             queue.index = -1;
-            queue.dispatcher.end();
+            queue.dispatcher.emit("finish");
             button.defer();
             break;
         }
@@ -147,7 +150,6 @@ client.on("clickButton", async button=>{
                 let queue = client.queue.get(member.guild.id);
                 queue.addSong({url: resolve(selector.current.id), name: selector.current.title, time: selector.current.length.simpleText, thumbnail: selector.current.thumbnail.thumbnails});
             }
-
             break;
         }
         case "nextpage": {
@@ -181,7 +183,7 @@ const bodyParser = require("body-parser");
 const passport = require("passport");
 const DiscordStrategy = require("passport-discord").Strategy;
 const CookieParser = require("cookie-parser");
-const session = require("express-session")
+const session = require("express-session");
 
 passport.use(new DiscordStrategy({
     clientID: "850562794968449056",
@@ -225,5 +227,23 @@ app.get("/auth/discord/cb", passport.authenticate("discord", {failureRedirect:"/
 app.get("/logout", (req, res)=>{
     req.session.destroy();
     res.redirect("/");
+});
+app.get("/dashboard", (req,res)=>{
+    if(!req.session||!req.session.user) {
+        return res.redirect("/login");
+    }
+    req.session.user.guilds = req.session?.user.guilds.map(e=>{    
+        let {id, icon} = e;  
+        if (!icon) iconURL = "https://discordapp.com/assets/1cbd08c76f8af6dddce02c5138971129.png";
+    else if(icon.startsWith("a_")) iconURL = `https://cdn.discordapp.com/icons/${id}/${icon}.gif`;
+    else iconURL = `https://cdn.discordapp.com/icons/${id}/${icon}.png`;
+    e.iconURL = iconURL
+    return e;
+});
+        let guilds = req.session.user.guilds.filter(e=>new Discord.Permissions(e.permissions).serialize().MANAGE_GUILD);
+        let toJoin = guilds.filter(e=>!client.guilds.cache.get(e.id));
+        let joined = guilds.filter(e=>client.guilds.cache.get(e.id));
+        res.render("dashboard",
+        {user: req.session.user, guilds, toJoin, joined})
 });
 app.listen(3000);
