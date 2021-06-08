@@ -186,7 +186,7 @@ const CookieParser = require("cookie-parser");
 const session = require("express-session");
 
 passport.use(new DiscordStrategy({
-    clientID: "850562794968449056",
+    clientID: require("./config.json").CLIENT_ID,
     clientSecret: require("./config.json").CLIENT_SECRET,
     callbackURL: "/auth/discord/cb",
     scope: ["guilds", "identify"]
