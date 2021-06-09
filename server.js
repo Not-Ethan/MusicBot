@@ -30,6 +30,7 @@ function startsWithPrefix(message, prefix) {
     return false;
 }
 client.on('message', message => {
+    message.content = message.content.toLowerCase();
     if(!message.guild) return;
     let prefix = client.settings.ensure(message.guild.id, defaultSettings).prefix;
     if(!startsWithPrefix(message, prefix)|| message.author.bot) {
@@ -45,17 +46,16 @@ client.on('message', message => {
     if(message.content.startsWith(prefix)) args = message.content.substring(prefix.length).split(" ");
     else if (message.content.startsWith(`<@!${client.user.id}>`)||message.content.startsWith(`<@${client.user.id}>`)){let c = message.content.split(" "); c.shift(); args = c;}
     args = clean(args);
-    if(client.commands.get(args[0].toLowerCase())||client.commands.filter(e=>e.alias.includes(args[0]))) {
-        if(client.commands.find(e=>e.name==args[0].toLowerCase()||e.alias.includes(args[0].toLowerCase()))) {
-            let command = client.commands.find(e=>e.name==args[0].toLowerCase()||e.alias.includes(args[0].toLowerCase()));
+    if(client.commands.get(args[0])||client.commands.filter(e=>e.alias.includes(args[0]))) {
+        if(client.commands.find(e=>e.name==args[0]||e.alias.includes(args[0]))) {
+            let command = client.commands.find(e=>e.name==args[0]||e.alias.includes(args[0]));
             if(command.disabled&&message.author.id!="402639792552017920") return;
-            client.commands.find(e=>e.name==args[0].toLowerCase()||e.alias.includes(args[0].toLowerCase())).execute(client,message,args);
+            client.commands.find(e=>e.name==args[0]||e.alias.includes(args[0])).execute(client,message,args);
         }
     }
 });
 const Queue = require("./util/serverQueue");
 const resolve = require("./util/resolveURL");
-const {MessageEmbed} = require("discord.js");
 client.on("clickButton", async button=>{
     let decoded = button.id.split("_");
     if(decoded[1]=="favoriteCurrent") {
@@ -75,14 +75,17 @@ client.on("clickButton", async button=>{
             switch(decoded[1]) {
             case "menuUp": {
                 menu.up();
+                button.message.channel.edit(menu.format());
                 break;
             }
             case "menuDown": {
                 menu.down();
+                button.message.channel.edit(menu.format());
                 break;
             }
             case "menuSelect": {
                 menu.execute(button);
+                button.message.channel.edit(menu.format());
                 break;
             }
             default: {
@@ -92,7 +95,7 @@ client.on("clickButton", async button=>{
     }
         let queue = client.queue.get(decoded[0]);
         if(!queue) {
-            console.log("j");button.defer(); return;
+            button.defer(); return;
         }
         await button.clicker.fetch()
         if(!button.clicker.member.voice.channel.id==queue.connection.channel.id) {button.defer();}
@@ -140,12 +143,12 @@ client.on("clickButton", async button=>{
             await button.defer();
             let vc = member.voice.channel;
             let con = await vc.join();
-            if(!client.queue.get(member.guild.id)) {
-                let queue = new Queue(client, button.message.channel, member.guild, con, {url: resolve(selector.current.id), name: selector.current.title, time: selector.current.length.simpleText, thumbnail: selector.current.thumbnail.thumbnails[0]?.url});
-                client.queue.set(member.guild.id, queue);
+            if(!client.queue.get(member.id)) {
+                let queue = new Queue(clint, button.message.channel, member.guild, con, {url: resolve(selector.current.id), name: selector.current.title, time: selector.current.length.simpleText, thumbnail: selector.current.thumbnail.thumbnails[0]?.url});
+                client.queue.set(member.id, queue);
             } else {
                 let queue = client.queue.get(member.guild.id);
-                queue.addSong({url: resolve(selector.current.id), name: selector.current.title, time: selector.current.length.simpleText, thumbnail: selector.current.thumbnail.thumbnails});
+                queue.addSong({url: resolve(selector.current.id), name: selector.current.title, time: selector.current.length.simpleText, thumbnail: selector.current.thumbnail.thumbnails[0]?.url});
             }
             break;
         }
