@@ -30,7 +30,7 @@ function startsWithPrefix(message, prefix) {
     return false;
 }
 client.on('message', message => {
-    if(!message.channel.type=="text") return message.channel.send("this command can only be used in a text channel");
+    if(!message.guild) return;
     let prefix = client.settings.ensure(message.guild.id, defaultSettings).prefix;
     if(!startsWithPrefix(message, prefix)|| message.author.bot) {
         return;
