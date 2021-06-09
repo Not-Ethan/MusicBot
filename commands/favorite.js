@@ -6,8 +6,6 @@ module.exports = {
     args: [{placeholder: "remove|list", description: "Must be remove or list"}, {placeholder: "index", description: "Index of the song to remove"}],
     alias: ["f", "like", "favorite"],
     description: "Remove a song from favorites or view favorites",
-    hidden: true,
-    disabled: true,
     execute(client,message,args) {
         switch (args[1]) {
             case "list": {
