@@ -1,9 +1,8 @@
 module.exports = class Track {
-    constructor(name, url, length, thumbnail, type){
+    constructor(name, url, length, thumbnail){
         this.name = name;
         this.url = url;
-        this.length = length;
+        this.time = length;
         this.thumbnail = thumbnail;
-        this.type = type;
     }
 }
