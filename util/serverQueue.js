@@ -89,9 +89,9 @@ module.exports = class ServerQueue {
         remove(i) {
             let removed = this.songs.splice(i-1, 1)[0];
             if(this.index>i) this.index -= 1;
-            else if (i==this.index) {
+            else if (i-1==this.index) {
                 if(this.songs[this.index+1]) this.playAudio();
-                else this.dispatcher.end();
+                else this.dispatcher.emit("finish");
             }
             let embed = new MessageEmbed()
             .setTitle(`Removed: ${removed.name}`)
