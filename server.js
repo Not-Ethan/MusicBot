@@ -30,6 +30,7 @@ function startsWithPrefix(message, prefix) {
     return false;
 }
 client.on('message', message => {
+    if(!message.channel.type=="text") return message.channel.send("this command can only be used in a text channel");
     let prefix = client.settings.ensure(message.guild.id, defaultSettings).prefix;
     if(!startsWithPrefix(message, prefix)|| message.author.bot) {
         return;
@@ -69,10 +70,9 @@ client.on("clickButton", async button=>{
     }
     let selector = client.activeSearches.get(decoded[0]);
     if(!selector) {
-        /*
         let menu = client.menus[decoded[2]]?.get(decoded[0]);
-        if(!menu) return button.defer();
-        else switch(decoded[1]) {
+        if(menu) {
+            switch(decoded[1]) {
             case "menuUp": {
                 menu.up();
                 break;
@@ -82,20 +82,20 @@ client.on("clickButton", async button=>{
                 break;
             }
             case "menuSelect": {
-                menu.execute();
+                menu.execute(button);
                 break;
             }
             default: {
                 button.defer();
             }
         }
-*/
+    }
         let queue = client.queue.get(decoded[0]);
         if(!queue) {
             console.log("j");button.defer(); return;
         }
         await button.clicker.fetch()
-        if(!button.clicker.member.voice.channel.id==queue.connection.channel.id) {console.log(j); button.defer();}
+        if(!button.clicker.member.voice.channel.id==queue.connection.channel.id) {button.defer();}
         switch(decoded[1]) {
         case "replay": {
             queue.index = -1;
@@ -115,7 +115,6 @@ client.on("clickButton", async button=>{
         }
         default: {
             button.defer();
-
         }
     }
     return;
@@ -142,9 +141,7 @@ client.on("clickButton", async button=>{
             let vc = member.voice.channel;
             let con = await vc.join();
             if(!client.queue.get(member.guild.id)) {
-                let b = new MessageButton().setLabel("❤️ \u200b\u200b").setID(`${member.guild.id}_favoriteCurrent`).setStyle("green");
-                let row = new MessageActionRow().addComponent(b);
-                let queue = new Queue(client, button.message.channel, member.guild, con, {url: resolve(selector.current.id), name: selector.current.title, time: selector.current.length.simpleText, thumbnail: selector.current.thumbnail.thumbnails}, await button.channel.send({embed: new MessageEmbed().setTitle("Now Playing").setDescription(selector.current.title).setURL(resolve(selector.current.id)), components: [row]}));
+                let queue = new Queue(client, button.message.channel, member.guild, con, {url: resolve(selector.current.id), name: selector.current.title, time: selector.current.length.simpleText, thumbnail: selector.current.thumbnail.thumbnails[0]?.url});
                 client.queue.set(member.guild.id, queue);
             } else {
                 let queue = client.queue.get(member.guild.id);
@@ -163,6 +160,9 @@ client.on("clickButton", async button=>{
             button.message.edit(selector.format(), {components: button.message.components, embed: (await selector.embed())});
             button.defer();
             break;
+        }
+        default: {
+            return button.defer();
         }
     }
 
