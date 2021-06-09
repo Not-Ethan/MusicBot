@@ -104,6 +104,5 @@ module.exports = class ServerQueue {
             let button = new MessageButton().setLabel("❤️ \u200b\u200b").setID(`${this.server.id}_favoriteCurrent`).setStyle("green");
             let row = new MessageActionRow().addComponent(button);
             this.message = await this.channel.send({embed: new MessageEmbed().setTitle("Now Playing").setDescription(this.current.name).setURL(resolve(this.current.url)), components: [row]})
-            console.log(this.message);
         }
 }
