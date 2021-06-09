@@ -4,7 +4,7 @@ module.exports = {
     alias: ["q"],
     description: "view and manage the queue of the server",
     execute(client, message, args) {
-        let queue = client.queue.get(message.guild.sid);
+        let queue = client.queue.get(message.guild.id);
         if(!queue) return message.channel.send("Nothing is playing in this server.");
         message.channel.send(formatQueue(queue),{embed: embed(queue)});
     }
