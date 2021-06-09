@@ -4,19 +4,19 @@
     <%-include ("partials/head.ejs")%>
     <link rel="stylesheet" href = "/main.css">
 </head>
-    <body style="text-align: center">
+    <body class="bg-dark" style="text-align: center;">
         <%- include("partials/nav")%>
-        <div class="container-fluid bg-dark">
-            <<div class="jumbotron jumbotron-fluid bg-secondary load-zoom-in" style="text-align: center">
+        <div class="container-fluid bg-dark full-bg">
+            <div class="jumbotron jumbotron-fluid bg-secondary load-zoom-in" style="text-align: center">
                     <h1 class="display-3">Servers</h1>
                 </div>
             <div class="card-columns">
                 <%for (guild of joined) {%>
-                    <div class="card border border-success bg-secondary hover-glow">
+                    <div class="card border border-success bg-secondary hover-glow load-zoom-out">
                             <img class="card-img-top rounded" src="<%=guild.iconURL%>" style="width:100px; height: 100px;" alt="Card image">
                         <div class="card-body">
                             <h4 class="card-title"><%=guild.name%></h4>
-                            <a class="btn-primary p-3 rounded" href="/dashboard/<%=guild.id%>">Go <span class="oi oi-arrow-right"></span></a>
+                            <a class="btn btn-primary p-3 rounded" href="/dashboard/<%=guild.id%>">Go <span class="oi oi-arrow-right"></span></a>
                         </div>
                     </div>
                 <%}%>
@@ -24,11 +24,11 @@
             <h3 class="text-light">Not Joined</h3>
             <div class="card-columns">
             <%for (guild of toJoin) {%>
-                <div class="card border border-danger bg-secondary">
+                <div class="card border border-danger bg-secondary load-zoom-out">
                     <img class="card-img-top rounded" src="<%=guild.iconURL%>" style="width:100px; height: 100px; filter: grayscale(100%);" alt="Card image">
                 <div class="card-body">
                     <h4 class="card-title"><%=guild.name%></h4>
-                    <a class="btn-info p-3 rounded" href="https://discord.com/api/oauth2/authorize?client_id=849804041201909781&permissions=8&scope=bot">Invite<span class="oi oi-arrow-right"></span></a>
+                    <a class="btn btn-info p-3 rounded" href="https://discord.com/api/oauth2/authorize?client_id=849804041201909781&permissions=8&scope=bot&guild_id=<%=guild.id%>&disable_guild_select=true">Invite<span class="oi oi-arrow-right"></span></a>
                 </div>
             </div>
         <%}%>
