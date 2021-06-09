@@ -64,32 +64,30 @@ client.on("clickButton", async button=>{
         await button.clicker.fetch();
         let f = client.favorites.ensure(button.clicker.user.id, []);
         if(!queue.current) return button.defer();
+        if(f.length>=20) return button.defer();
         f.push(queue.current);
         client.favorites.set(button.clicker.user.id, f);
         return button.defer();
     }
     let selector = client.activeSearches.get(decoded[0]);
-    if(!selector) {
         let menu = client.menus[decoded[2]]?.get(decoded[0]);
         if(menu) {
             switch(decoded[1]) {
             case "menuUp": {
-                menu.up();
-                button.message.channel.edit(menu.format());
+                menu.up(button);
                 break;
             }
             case "menuDown": {
-                menu.down();
-                button.message.channel.edit(menu.format());
+                menu.down(button);
                 break;
             }
             case "menuSelect": {
+                console.log("select");
                 menu.execute(button);
-                button.message.channel.edit(menu.format());
                 break;
             }
             default: {
-                button.defer();
+                return
             }
         }
     }
@@ -116,59 +114,59 @@ client.on("clickButton", async button=>{
                 break;
             }
             default: {
+                return
+            }
+        }
+    }
+    if(selector) {
+        if(!selector.message.id==button.message.id) return button.defer();
+        switch (decoded[1]) {
+            case "up": {
+                selector.up();
+                button.message.edit(selector.format(), {components: button.message.components, embed: (await selector.embed())});
                 button.defer();
+                break;
+            }
+            case "down": {
+                selector.down();
+                button.message.edit(selector.format(), {components: button.message.components, embed: (await selector.embed())});
+                button.defer();
+                break;
+            }
+            case "play": {
+                let member = await button.message.guild.members.fetch(decoded[0]);
+                if(!member.voice.channel) return button.message.channel.send("You need to be in a voice channel to play music!");
+                if((button.message.guild.me.voice.channel!=null)&&button.message.guild.me.voice.channel!=member.voice.channel) return button.message.channel.send("I am in use in another channel right now!");
+                await button.defer();
+                let vc = member.voice.channel;
+                let con = await vc.join();
+                if(!client.queue.get(member.guild.id)) {
+                    let queue = new Queue(client, button.message.channel, member.guild, con, {url: resolve(selector.current.id), name: selector.current.title, time: selector.current.length.simpleText, thumbnail: selector.current.thumbnail.thumbnails[0]?.url});
+                    client.queue.set(member.guild.id, queue);
+                } else {
+                    let queue = client.queue.get(member.guild.id);
+                    queue.addSong({url: resolve(selector.current.id), name: selector.current.title, time: selector.current.length.simpleText, thumbnail: selector.current.thumbnail.thumbnails[0]?.url});
+                }
+                break;
+            }
+            case "nextpage": {
+                await selector.nextPage();
+                button.message.edit(selector.format(), {components: button.message.components, embed: (await selector.embed())});
+                button.defer();
+                break;
+            }
+            case "prevpage": {
+                selector.prevPage();
+                button.message.edit(selector.format(), {components: button.message.components, embed: (await selector.embed())});
+                button.defer();
+                break;
+            }
+            default: {
+                return
             }
         }
     }
-    return;
-    }
-    if(!selector.message.id==button.message.id) return button.defer();
-    switch (decoded[1]) {
-        case "up": {
-            selector.up();
-            button.message.edit(selector.format(), {components: button.message.components, embed: (await selector.embed())});
-            button.defer();
-            break;
-        }
-        case "down": {
-            selector.down();
-            button.message.edit(selector.format(), {components: button.message.components, embed: (await selector.embed())});
-            button.defer();
-            break;
-        }
-        case "play": {
-            let member = await button.message.guild.members.fetch(decoded[0]);
-            if(!member.voice.channel) return button.message.channel.send("You need to be in a voice channel to play music!");
-            if((button.message.guild.me.voice.channel!=null)&&button.message.guild.me.voice.channel!=member.voice.channel) return button.message.channel.send("I am in use in another channel right now!");
-            await button.defer();
-            let vc = member.voice.channel;
-            let con = await vc.join();
-            if(!client.queue.get(member.guild.id)) {
-                let queue = new Queue(client, button.message.channel, member.guild, con, {url: resolve(selector.current.id), name: selector.current.title, time: selector.current.length.simpleText, thumbnail: selector.current.thumbnail.thumbnails[0]?.url});
-                client.queue.set(member.guild.id, queue);
-            } else {
-                let queue = client.queue.get(member.guild.id);
-                queue.addSong({url: resolve(selector.current.id), name: selector.current.title, time: selector.current.length.simpleText, thumbnail: selector.current.thumbnail.thumbnails[0]?.url});
-            }
-            break;
-        }
-        case "nextpage": {
-            await selector.nextPage();
-            button.message.edit(selector.format(), {components: button.message.components, embed: (await selector.embed())});
-            button.defer();
-            break;
-        }
-        case "prevpage": {
-            selector.prevPage();
-            button.message.edit(selector.format(), {components: button.message.components, embed: (await selector.embed())});
-            button.defer();
-            break;
-        }
-        default: {
-            return button.defer();
-        }
-    }
-
+    await button.defer();
 })
 
 function clean(array) {
