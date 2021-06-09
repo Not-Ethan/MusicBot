@@ -144,7 +144,7 @@ client.on("clickButton", async button=>{
             let vc = member.voice.channel;
             let con = await vc.join();
             if(!client.queue.get(member.id)) {
-                let queue = new Queue(clint, button.message.channel, member.guild, con, {url: resolve(selector.current.id), name: selector.current.title, time: selector.current.length.simpleText, thumbnail: selector.current.thumbnail.thumbnails[0]?.url});
+                let queue = new Queue(client, button.message.channel, member.guild, con, {url: resolve(selector.current.id), name: selector.current.title, time: selector.current.length.simpleText, thumbnail: selector.current.thumbnail.thumbnails[0]?.url});
                 client.queue.set(member.id, queue);
             } else {
                 let queue = client.queue.get(member.guild.id);
