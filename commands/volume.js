@@ -5,7 +5,7 @@ module.exports = {
     syntax: "volume",
     description: "change volume",
     execute(client,message,args) {
-        let queue = client.queue.get(message.guild.id);
+        let queue = client.queue.get(message.author.id);
         if(!queue) return message.channel.send("Nothing playing in this server");
         if(isNaN(parseFloat(args[1]))) return message.channel.send("You need to supply a valid number.");
         queue.setVolume(parseFloat(args[1])/100);

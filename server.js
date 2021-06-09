@@ -30,6 +30,7 @@ function startsWithPrefix(message, prefix) {
     return false;
 }
 client.on('message', message => {
+    message.content = message.content.toLowerCase();
     if(!message.guild) return;
     let prefix = client.settings.ensure(message.guild.id, defaultSettings).prefix;
     if(!startsWithPrefix(message, prefix)|| message.author.bot) {
@@ -45,17 +46,16 @@ client.on('message', message => {
     if(message.content.startsWith(prefix)) args = message.content.substring(prefix.length).split(" ");
     else if (message.content.startsWith(`<@!${client.user.id}>`)||message.content.startsWith(`<@${client.user.id}>`)){let c = message.content.split(" "); c.shift(); args = c;}
     args = clean(args);
-    if(client.commands.get(args[0].toLowerCase())||client.commands.filter(e=>e.alias.includes(args[0]))) {
-        if(client.commands.find(e=>e.name==args[0].toLowerCase()||e.alias.includes(args[0].toLowerCase()))) {
-            let command = client.commands.find(e=>e.name==args[0].toLowerCase()||e.alias.includes(args[0].toLowerCase()));
+    if(client.commands.get(args[0])||client.commands.filter(e=>e.alias.includes(args[0]))) {
+        if(client.commands.find(e=>e.name==args[0]||e.alias.includes(args[0]))) {
+            let command = client.commands.find(e=>e.name==args[0]||e.alias.includes(args[0]));
             if(command.disabled&&message.author.id!="402639792552017920") return;
-            client.commands.find(e=>e.name==args[0].toLowerCase()||e.alias.includes(args[0].toLowerCase())).execute(client,message,args);
+            client.commands.find(e=>e.name==args[0]||e.alias.includes(args[0])).execute(client,message,args);
         }
     }
 });
 const Queue = require("./util/serverQueue");
 const resolve = require("./util/resolveURL");
-const {MessageEmbed} = require("discord.js");
 client.on("clickButton", async button=>{
     let decoded = button.id.split("_");
     if(decoded[1]=="favoriteCurrent") {
@@ -64,108 +64,109 @@ client.on("clickButton", async button=>{
         await button.clicker.fetch();
         let f = client.favorites.ensure(button.clicker.user.id, []);
         if(!queue.current) return button.defer();
+        if(f.length>=20) return button.defer();
         f.push(queue.current);
         client.favorites.set(button.clicker.user.id, f);
         return button.defer();
     }
     let selector = client.activeSearches.get(decoded[0]);
-    if(!selector) {
         let menu = client.menus[decoded[2]]?.get(decoded[0]);
         if(menu) {
             switch(decoded[1]) {
             case "menuUp": {
-                menu.up();
+                menu.up(button);
                 break;
             }
             case "menuDown": {
-                menu.down();
+                menu.down(button);
                 break;
             }
             case "menuSelect": {
+                console.log("select");
                 menu.execute(button);
                 break;
             }
             default: {
-                button.defer();
+                return
             }
         }
     }
         let queue = client.queue.get(decoded[0]);
-        if(!queue) {
-            console.log("j");button.defer(); return;
-        }
-        await button.clicker.fetch()
-        if(!button.clicker.member.voice.channel.id==queue.connection.channel.id) {button.defer();}
-        switch(decoded[1]) {
-        case "replay": {
-            queue.index = -1;
-            queue.dispatcher.emit("finish");
-            button.defer();
-            break;
-        }
-        case "loop": {
-            let queue = client.queue.get(decoded[0]);
-            if(!queue) return button.message.channel.send("Nothing playing in this server.");
-            queue.loop = !queue.loop;
-            button.message.channel.send(`Queue loop is now \`${queue.loop ? "on" : "off"}\``);
-            button.defer();
-            queue.index = -1;
-            queue.dispatcher.emit("finish");
-            break;
-        }
-        default: {
-            button.defer();
-        }
-    }
-    return;
-    }
-    if(!selector.message.id==button.message.id) return button.defer();
-    switch (decoded[1]) {
-        case "up": {
-            selector.up();
-            button.message.edit(selector.format(), {components: button.message.components, embed: (await selector.embed())});
-            button.defer();
-            break;
-        }
-        case "down": {
-            selector.down();
-            button.message.edit(selector.format(), {components: button.message.components, embed: (await selector.embed())});
-            button.defer();
-            break;
-        }
-        case "play": {
-            let member = await button.message.guild.members.fetch(decoded[0]);
-            if(!member.voice.channel) return button.message.channel.send("You need to be in a voice channel to play music!");
-            if((button.message.guild.me.voice.channel!=null)&&button.message.guild.me.voice.channel!=member.voice.channel) return button.message.channel.send("I am in use in another channel right now!");
-            await button.defer();
-            let vc = member.voice.channel;
-            let con = await vc.join();
-            if(!client.queue.get(member.guild.id)) {
-                let queue = new Queue(client, button.message.channel, member.guild, con, {url: resolve(selector.current.id), name: selector.current.title, time: selector.current.length.simpleText, thumbnail: selector.current.thumbnail.thumbnails[0]?.url});
-                client.queue.set(member.guild.id, queue);
-            } else {
-                let queue = client.queue.get(member.guild.id);
-                queue.addSong({url: resolve(selector.current.id), name: selector.current.title, time: selector.current.length.simpleText, thumbnail: selector.current.thumbnail.thumbnails});
+        if(queue) {
+            await button.clicker.fetch()
+            if(!button.clicker.member.voice.channel.id==queue.connection.channel.id) {button.defer();}
+            switch(decoded[1]) {
+            case "replay": {
+                console.log("j")
+                queue.index = -1;
+                queue.dispatcher.emit("finish");
+                button.defer();
+                break;
             }
-            break;
-        }
-        case "nextpage": {
-            await selector.nextPage();
-            button.message.edit(selector.format(), {components: button.message.components, embed: (await selector.embed())});
-            button.defer();
-            break;
-        }
-        case "prevpage": {
-            selector.prevPage();
-            button.message.edit(selector.format(), {components: button.message.components, embed: (await selector.embed())});
-            button.defer();
-            break;
-        }
-        default: {
-            return button.defer();
+            case "loop": {
+                let queue = client.queue.get(decoded[0]);
+                if(!queue) return button.message.channel.send("Nothing playing in this server.");
+                queue.loop = !queue.loop;
+                button.message.channel.send(`Queue loop is now \`${queue.loop ? "on" : "off"}\``);
+                button.defer();
+                queue.index = -1;
+                queue.dispatcher.emit("finish");
+                break;
+            }
+            default: {
+                return
+            }
         }
     }
-
+    if(selector) {
+        if(!selector.message.id==button.message.id) return button.defer();
+        switch (decoded[1]) {
+            case "up": {
+                selector.up();
+                button.message.edit(selector.format(), {components: button.message.components, embed: (await selector.embed())});
+                button.defer();
+                break;
+            }
+            case "down": {
+                selector.down();
+                button.message.edit(selector.format(), {components: button.message.components, embed: (await selector.embed())});
+                button.defer();
+                break;
+            }
+            case "play": {
+                let member = await button.message.guild.members.fetch(decoded[0]);
+                if(!member.voice.channel) return button.message.channel.send("You need to be in a voice channel to play music!");
+                if((button.message.guild.me.voice.channel!=null)&&button.message.guild.me.voice.channel!=member.voice.channel) return button.message.channel.send("I am in use in another channel right now!");
+                await button.defer();
+                let vc = member.voice.channel;
+                let con = await vc.join();
+                if(!client.queue.get(member.guild.id)) {
+                    let queue = new Queue(client, button.message.channel, member.guild, con, {url: resolve(selector.current.id), name: selector.current.title, time: selector.current.length.simpleText, thumbnail: selector.current.thumbnail.thumbnails[0]?.url});
+                    client.queue.set(member.guild.id, queue);
+                } else {
+                    let queue = client.queue.get(member.guild.id);
+                    queue.addSong({url: resolve(selector.current.id), name: selector.current.title, time: selector.current.length.simpleText, thumbnail: selector.current.thumbnail.thumbnails[0]?.url});
+                }
+                break;
+            }
+            case "nextpage": {
+                await selector.nextPage();
+                button.message.edit(selector.format(), {components: button.message.components, embed: (await selector.embed())});
+                button.defer();
+                break;
+            }
+            case "prevpage": {
+                selector.prevPage();
+                button.message.edit(selector.format(), {components: button.message.components, embed: (await selector.embed())});
+                button.defer();
+                break;
+            }
+            default: {
+                return
+            }
+        }
+    }
+    await button.defer();
 })
 
 function clean(array) {

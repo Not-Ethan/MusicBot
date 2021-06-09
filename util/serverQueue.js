@@ -32,9 +32,10 @@ module.exports = class ServerQueue {
             this.volume = x;
         }
         addSong(x) {
+            if(x.thumbnail[0]?.url) x.thumbnail = x.thumbnail[0].url;
             this.songs.push(x);
             if(!this.current) this.playAudio(); else {
-                this.channel.send(new MessageEmbed().setTitle(`Queued: `+x.name).setThumbnail(x.thumbnail).setURL(x.url).setTimestamp().setDescription(`Playing in approximately ` + (()=>{let minutes=0; minutes += (Math.round(parseInt(minutes+=this.current.time.split(":")[0])-Math.trunc(this.dispatcher.streamTime/1000)/60)); let seconds=0; seconds+=(Math.round(parseInt(this.current.time.split(":")[1])-Math.trunc(this.dispatcher.streamTime/1000)%60)); let songs = Array.from(this.songs.slice(this.index+1)); songs.shift(); songs.map(e=>{e.time.split(":").map(((a, i)=>{if(i==0) {minutes+=parseInt(a)} else if(i==1)seconds+=parseInt(a);}))});minutes += Math.trunc(seconds / 60); seconds %= 60; return `${minutes} minute${minutes==1 ? "" : "s"} and ${Math.round(seconds)} second${seconds==1 ? "" : "s"}`})()));
+                this.channel.send(new MessageEmbed().setTitle(`Queued: `+x.name).setColor("FFE000").setThumbnail(x.thumbnail).setURL(x.url).setTimestamp().setDescription(`Playing in approximately ` + (()=>{let minutes=0; minutes += (Math.round(parseInt(minutes+=this.current.time.split(":")[0])-Math.trunc(this.dispatcher.streamTime/1000)/60)); let seconds=0; seconds+=(Math.round(parseInt(this.current.time.split(":")[1])-Math.trunc(this.dispatcher.streamTime/1000)%60)); let songs = Array.from(this.songs.slice(this.index+1)); songs.shift(); songs.map(e=>{e.time.split(":").map(((a, i)=>{if(i==0) {minutes+=parseInt(a)} else if(i==1)seconds+=parseInt(a);}))});minutes += Math.trunc(seconds / 60); seconds %= 60; return `${minutes} minute${minutes==1 ? "" : "s"} and ${Math.round(seconds)} second${seconds==1 ? "" : "s"}`})()));
             }
         }
         async playAudio() {
@@ -50,8 +51,8 @@ module.exports = class ServerQueue {
                         if(!this.message.id) await this.message;
                         this.pause(true);
                         this.current = null;
-                        let replay = new MessageButton().setLabel("Replay").setID(`${this.message.guild.id}_replay`).setStyle("green");
-                        let loop = new MessageButton().setLabel("Loop").setID(`${this.message.guild.id}_loop`).setStyle("blurple");
+                        let replay = new MessageButton().setLabel("Replay").setID(`${this.server.id}_replay`).setStyle("green");
+                        let loop = new MessageButton().setLabel("Loop").setID(`${this.server.id}_loop`).setStyle("blurple");
                         let row = new MessageActionRow().addComponent(replay).addComponent(loop);
                         if(this.previousLoopEnded) this.previousLoopEnded.delete();
                         this.previousLoopEnded = await this.message.channel.send("",{components: [row], embed: new MessageEmbed().setTitle("Queue Empty").setDescription("There are no more songs left in queue. Replay?").setURL(null).setTimestamp()});
@@ -89,9 +90,14 @@ module.exports = class ServerQueue {
         remove(i) {
             let removed = this.songs.splice(i-1, 1)[0];
             if(this.index>i) this.index -= 1;
-            else if (i==this.index) {
-                if(this.songs[this.index+1]) this.playAudio();
-                else this.dispatcher.end();
+            else if (i-1==this.index) {
+                if(this.songs[this.index+1]) {
+                    this.index-=1; this.playAudio();
+                }
+                else {
+                    this.index-=1;
+                    this.dispatcher.emit("finish");
+                }
             }
             let embed = new MessageEmbed()
             .setTitle(`Removed: ${removed.name}`)
@@ -100,9 +106,9 @@ module.exports = class ServerQueue {
             this.message.channel.send(embed);
         }
         async _updatePlayingMessage() {
-            if(this.message) this.message.delete(100);
-            let button = new MessageButton().setLabel("❤️ \u200b\u200b").setID(`${this.server.id}_favoriteCurrent`).setStyle("green");
+            if(this.message) this.message.delete({delay: 100});
+            let button = new MessageButton().setLabel("❤️ \u200b\u200b\u200b").setID(`${this.server.id}_favoriteCurrent`).setStyle("green");
             let row = new MessageActionRow().addComponent(button);
-            this.message = await this.channel.send({embed: new MessageEmbed().setTitle("Now Playing").setDescription(this.current.name).setURL(resolve(this.current.url)), components: [row]})
+            this.message = await this.channel.send({embed: new MessageEmbed().setColor("66AC3E").setTitle("Now Playing").setDescription(this.current.name).setURL(resolve(this.current.url)), components: [row]})
         }
 }
