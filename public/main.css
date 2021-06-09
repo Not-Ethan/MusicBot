@@ -37,6 +37,9 @@
     object-fit: cover;
     }
 @keyframes bg-animate {
+    0% {
+        transform: scale(0);
+    }
     100% {
         transform: scale(3) rotate(360deg) translate(var(--bg-animation-translate-x), var(--bg-animation-translate-y));
         opacity: 0;
