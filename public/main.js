@@ -9,8 +9,9 @@ function animateBackground() {
     e.style.top = (Math.random() * bg.offsetHeight)+"px";
     e.style.left = (Math.random() * bg.offsetWidth)+"px";
     e.style.zIndex = 0;
-    e.style.setProperty("--gb-animation-translate-x", Math.floor(Math.random()*20))
-    e.style.setProperty("--gb-animation-translate-y", Math.floor(Math.random()*20))
+    let a = (()=>Math.sign(Math.round(Math.random())-1) ? -1 : 1);
+    e.style.setProperty("--gb-animation-translate-x", Math.floor(Math.random()*20))*a();
+    e.style.setProperty("--gb-animation-translate-y", Math.floor(Math.random()*20))*a();
     e.innerHTML = (()=>{switch (Math.floor(Math.random()*3)) {case 2: return "&#9633"; case 0: return "&#11040"; case 1: return "&#9651"}})();
     bg.appendChild(e);
     setTimeout(()=>{
