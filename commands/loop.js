@@ -5,7 +5,7 @@ module.exports = {
     syntax: "repeat",
     description: "toggle looping the current queue",
     execute(client,message,args){
-        let queue = client.queue.get(message.guild.id);
+        let queue = client.queue.get(message.author.id);
         if(!queue) return message.channel.send("Nothing playing in this server.");
         queue.loop = !queue.loop;
         message.channel.send(`Queue loop is now \`${queue.loop ? "on" : "off"}\``);

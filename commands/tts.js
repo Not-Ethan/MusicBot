@@ -11,7 +11,7 @@ module.exports = {
         if(message.channel.type!="text") return message.reply("This command can only be used in a server.")
         const vc = message.member.voice.channel;
         if(!vc) return message.channel.send("You need to be in a voice channel to run this command.")
-        if(client.queue.get(message.guild.id).current) return message.channel.send("There is something playing in this server.");
+        if(client.queue.get(message.author.id).current) return message.channel.send("There is something playing in this server.");
         vc.join().then(con=>{
             try {
                 let toSpeech = args.slice(1);

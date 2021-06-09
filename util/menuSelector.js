@@ -24,6 +24,9 @@ module.exports = class MenuSelector {
     execute(button) {
         
     }
+    format() {
+        return "N/A";
+    }
     _update() {
         this.current = this.items[this.index];
     }
