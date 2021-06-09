@@ -94,30 +94,30 @@ client.on("clickButton", async button=>{
         }
     }
         let queue = client.queue.get(decoded[0]);
-        if(!queue) {
-            button.defer(); return;
-        }
-        await button.clicker.fetch()
-        if(!button.clicker.member.voice.channel.id==queue.connection.channel.id) {button.defer();}
-        switch(decoded[1]) {
-        case "replay": {
-            queue.index = -1;
-            queue.dispatcher.emit("finish");
-            button.defer();
-            break;
-        }
-        case "loop": {
-            let queue = client.queue.get(decoded[0]);
-            if(!queue) return button.message.channel.send("Nothing playing in this server.");
-            queue.loop = !queue.loop;
-            button.message.channel.send(`Queue loop is now \`${queue.loop ? "on" : "off"}\``);
-            button.defer();
-            queue.index = -1;
-            queue.dispatcher.emit("finish");
-            break;
-        }
-        default: {
-            button.defer();
+        if(queue) {
+            await button.clicker.fetch()
+            if(!button.clicker.member.voice.channel.id==queue.connection.channel.id) {button.defer();}
+            switch(decoded[1]) {
+            case "replay": {
+                console.log("j")
+                queue.index = -1;
+                queue.dispatcher.emit("finish");
+                button.defer();
+                break;
+            }
+            case "loop": {
+                let queue = client.queue.get(decoded[0]);
+                if(!queue) return button.message.channel.send("Nothing playing in this server.");
+                queue.loop = !queue.loop;
+                button.message.channel.send(`Queue loop is now \`${queue.loop ? "on" : "off"}\``);
+                button.defer();
+                queue.index = -1;
+                queue.dispatcher.emit("finish");
+                break;
+            }
+            default: {
+                button.defer();
+            }
         }
     }
     return;
@@ -143,9 +143,9 @@ client.on("clickButton", async button=>{
             await button.defer();
             let vc = member.voice.channel;
             let con = await vc.join();
-            if(!client.queue.get(member.id)) {
+            if(!client.queue.get(member.guild.id)) {
                 let queue = new Queue(client, button.message.channel, member.guild, con, {url: resolve(selector.current.id), name: selector.current.title, time: selector.current.length.simpleText, thumbnail: selector.current.thumbnail.thumbnails[0]?.url});
-                client.queue.set(member.id, queue);
+                client.queue.set(member.guild.id, queue);
             } else {
                 let queue = client.queue.get(member.guild.id);
                 queue.addSong({url: resolve(selector.current.id), name: selector.current.title, time: selector.current.length.simpleText, thumbnail: selector.current.thumbnail.thumbnails[0]?.url});

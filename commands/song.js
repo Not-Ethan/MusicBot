@@ -5,7 +5,7 @@ module.exports = {
     args: [],
     description: "Information about the current song",
     execute(client,message,args) {
-        let queue = client.queue.get(message.author.id);
+        let queue = client.queue.get(message.guild.id);
         if(!queue||!queue.current) return message.channel.send("Nothing playing in this server");
         let played = Math.trunc(queue.dispatcher.streamTime/1000);
         let total = 0;

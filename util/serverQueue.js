@@ -51,8 +51,8 @@ module.exports = class ServerQueue {
                         if(!this.message.id) await this.message;
                         this.pause(true);
                         this.current = null;
-                        let replay = new MessageButton().setLabel("Replay").setID(`${this.message.guild.id}_replay`).setStyle("green");
-                        let loop = new MessageButton().setLabel("Loop").setID(`${this.message.guild.id}_loop`).setStyle("blurple");
+                        let replay = new MessageButton().setLabel("Replay").setID(`${this.server.id}_replay`).setStyle("green");
+                        let loop = new MessageButton().setLabel("Loop").setID(`${this.server.id}_loop`).setStyle("blurple");
                         let row = new MessageActionRow().addComponent(replay).addComponent(loop);
                         if(this.previousLoopEnded) this.previousLoopEnded.delete();
                         this.previousLoopEnded = await this.message.channel.send("",{components: [row], embed: new MessageEmbed().setTitle("Queue Empty").setDescription("There are no more songs left in queue. Replay?").setURL(null).setTimestamp()});
