@@ -2,8 +2,9 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 const fs = require("fs-extra");
 const commandFiles = fs.readdirSync("./commands").filter(e=>e.endsWith(".js"));
-const {TOKEN} = require("./config.json");
+const {TOKEN, SAPI_SECRET} = require("./config.json");
 const Enmap = require("enmap");
+const sAPI = require("spotify-web-api-node");
 require("discord-buttons")(client);
 const {MessageActionRow, MessageButton} = require("discord-buttons");
 client.commands = new Discord.Collection();
@@ -11,6 +12,9 @@ client.settings = new Enmap("settings");
 client.favorites = new Enmap("favorites");
 client.menus = {}
 client.menus.favorites = new Discord.Collection();
+
+client.spotifyAPI = new sAPI({clientId:"508f5b431c8b4ebd993e380b9178be1e",
+    clientSecret: SAPI_SECRET});
 const defaultSettings = {
     prefix: "$"
 }
@@ -166,7 +170,6 @@ client.on("clickButton", async button=>{
             }
         }
     }
-    await button.defer();
 })
 
 function clean(array) {
