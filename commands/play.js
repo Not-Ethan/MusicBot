@@ -2,6 +2,7 @@ const search = require("youtube-search-api");
 const format = require("../util/formatResults");
 const {MessageButton, MessageActionRow} = require("discord-buttons");
 const SongSelector = require("../util/songSelector");
+const {getPreview} = require("spotify-url-info");
 module.exports = {
     name: "play",
     description: "search youtube for a video and play the audio",
@@ -12,7 +13,21 @@ module.exports = {
     if(!args.slice(1)[0]) return message.channel.send("You need to specify a search term.");
     
     const searchTerm = args.slice(1).join(" ");
-    
+    let url;
+    try {
+        url = new URL(args[1]);
+    } catch {
+        url = null;
+    }
+    if(url) {
+        let spotifySearch = new RegExp("/^(http:\/\/)|^(https:\/\/)(open\.spotify\.com/track/).+/g");
+        if(spotifySearch.test(url.href)) {
+            getPreview(url.href).then(e=>{
+                search.GetListByKeyword(e.title + " " + e.artist);
+            })
+        }
+    }
+else {
     const up = new MessageButton().setLabel("Up").setID(message.author.id + "_up").setStyle("blurple");
     const play = new MessageButton().setLabel("Play").setID(`${message.author.id}_play`).setStyle("green");
     const down = new MessageButton().setLabel("Down").setID(message.author.id + "_down").setStyle("blurple");
@@ -32,6 +47,6 @@ module.exports = {
     let formated = format(selector.currentSection, selector.current);
 
     message.channel.send("\n"+formated+"\n", {components: [comp, skips], embed: await selector.embed()});
-    
+}
     }
 }
