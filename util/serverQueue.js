@@ -41,7 +41,7 @@ module.exports = class ServerQueue {
         async playAudio() {
             this.index += 1;
             this.current = this.songs[this.index];
-            this.dispatcher = this.connection.play(Readable.from(ytdl(this.current.url, {fmt: "wav", encoderArgs: ["-af", "bass=g="+this.bass+",dynaudnorm=f=100", "-b:a", "1024k"], filter:"audioonly"})), {highWaterMark: 50});
+            this.dispatcher = this.connection.play((ytdl(this.current.url, {fmt: "wav", encoderArgs: ["-af", "bass=g="+this.bass+",dynaudnorm=f=100", "-b:a", "1024k"], filter:"audioonly"})), {highWaterMark: 50});
             this.dispatcher.setVolume(this.volume);
             await this._updatePlayingMessage();
             this.dispatcher.on("finish", async ()=>{
