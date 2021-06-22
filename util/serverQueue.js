@@ -41,7 +41,7 @@ module.exports = class ServerQueue {
         async playAudio() {
             this.index += 1;
             this.current = this.songs[this.index];
-            this.dispatcher = this.connection.play(Readable.from(ytdl(this.current.url, {fmt: "wav", encoderArgs: ["-af", "bass=g="+this.bass+",dynaudnorm=f=100", "-b:a", "1024k"], filter:"audioonly"})), {highWaterMark: 50});
+            this.dispatcher = await this.connection.play((ytdl(this.current.url, {fmt: "mp3", encoderArgs: ["-af", "bass=g="+this.bass+",dynaudnorm=f=100", "-b:a", "1024k"], filter:"audioonly"})), {highWaterMark: 50});
             this.dispatcher.setVolume(this.volume);
             await this._updatePlayingMessage();
             this.dispatcher.on("finish", async ()=>{
@@ -57,7 +57,7 @@ module.exports = class ServerQueue {
                         if(this.previousLoopEnded) this.previousLoopEnded.delete();
                         this.previousLoopEnded = await this.message.channel.send("",{components: [row], embed: new MessageEmbed().setTitle("Queue Empty").setDescription("There are no more songs left in queue. Replay?").setURL(null).setTimestamp()});
                     } else if (this.loop&&this.songs[0]) {
-                        if(!this.message.id) await this.message;
+                        if(!this.message.id) this.message = await this.message;
                         this.index = -1;
                         this.playAudio();
                         let embed = new MessageEmbed()

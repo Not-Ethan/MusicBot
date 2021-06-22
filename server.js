@@ -90,15 +90,12 @@ client.on("clickButton", async button=>{
                 menu.execute(button);
                 break;
             }
-            default: {
-                return
-            }
         }
     }
         let queue = client.queue.get(decoded[0]);
         if(queue) {
             await button.clicker.fetch()
-            if(!button.clicker.member.voice.channel.id==queue.connection.channel.id) {button.defer();}
+            if(!button.clicker.member.voice.channel?.id==queue.connection.channel?.id) {button.defer();}
             switch(decoded[1]) {
             case "replay": {
                 console.log("j")
@@ -116,9 +113,6 @@ client.on("clickButton", async button=>{
                 queue.index = -1;
                 queue.dispatcher.emit("finish");
                 break;
-            }
-            default: {
-                return
             }
         }
     }
@@ -166,7 +160,7 @@ client.on("clickButton", async button=>{
                 break;
             }
             default: {
-                return
+                return button.defer();
             }
         }
     }
