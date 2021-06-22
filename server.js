@@ -160,7 +160,7 @@ client.on("clickButton", async button=>{
                 break;
             }
             default: {
-                return
+                return button.defer();
             }
         }
     }
