@@ -159,9 +159,6 @@ client.on("clickButton", async button=>{
                 button.defer();
                 break;
             }
-            default: {
-                return button.defer();
-            }
         }
     }
 })
